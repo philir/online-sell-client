@@ -38,7 +38,7 @@
               <li class="food" v-for="food in selectFoods">
                 <span class="name">{{food.name}}</span>
                 <div class="price">
-                  <span>￥{{food.price*food.count}}</span>
+                  <span>￥{{Number(food.price*food.count).toFixed(2)}}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
                   <cartcontrol @add="addFood" :food="food"></cartcontrol>
@@ -113,7 +113,8 @@
         this.selectFoods.forEach((food) => {
           total += food.price * food.count;
         });
-        return total;
+        total = Number(total).toFixed(2);
+        return total
       },
       totalCount() {
         let count = 0;
@@ -245,10 +246,10 @@
   .shopcart
     position: fixed
     left: 0
-    bottom: 0
+    bottom: 40px
     z-index: 50
     width: 100%
-    height: 48px
+    height: 54px
     .content
       display: flex
       background: #141d27

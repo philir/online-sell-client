@@ -1,12 +1,13 @@
 <template>
 	<div class="payment">
+    <head-top go-back='true' head-title="支付界面"></head-top>
 	  <div class="user-info">
 			<div class="item"><label class="label">联系人</label><input placeholder="姓名" class="input" v-model="name" type="text"></div>
-			<div class="item"><label>联系电话</label><input placeholder="你的手机号" v-model="phone" type="text"></div>
+			<div class="item"><label>联系电话</label><input placeholder="你的手机号" v-model="phone" type="text" maxlength="11" minlength="11" @input="handleInput"/></div>
 			<div class="item"><label>送餐地址</label><input placeholder="送餐地址" v-model="address" type="text"></div>
 		</div>
 		<div class="food-info">
-			<div class="card-hd"><img  class="avator" :src="seller.avatar"><span class="title">{{seller.name}}</span></div>
+			<div class="card-hd"><img  class="avator" src="/sell/image/fendou.jpg"><span class="title">{{seller.name}}</span></div>
 
 			<div v-for="item in selectedGoods" class="food-item">
 				<label>{{item.name}}</label>
@@ -20,6 +21,7 @@
 	</div>
 </template>
 <script >
+  import headTop from 'src/components/header/head1'
     var config = require('config')
     config = process.env.NODE_ENV === 'development' ? config.dev : config.build
 	export default {
@@ -27,9 +29,9 @@
 			return {
 				selectedGoods: [],
 				seller: {},
-				name: '师兄',
-				phone: '18868877111',
-				address: '慕课网大楼'
+				name: '',
+				phone: '',
+				address: ''
 			};
 		},
 		computed: {
@@ -52,7 +54,7 @@
                     return {productId: good.id, productQuantity: good.count}
                 });
                 const ERR_OK = 0;
-                this.$http.post("/sell/buyer/order/create", {
+                this.$http.post(this.HOST+"/buyer/order/create", {
                     'openid': getCookie('openid'),
                     'phone': this.phone,
                     'name': this.name,
@@ -62,7 +64,7 @@
                     respones = respones.body;
                     if (respones.code == ERR_OK) {
                       location.href = config.wechatPayUrl +
-                        '?openid=' + getCookie('openid') +
+                        '?openid=oTgZpwY0gi26ntYJ1N-O5Q7QO9Ls' +
                         '&orderId=' + respones.data.orderId +
                         '&returnUrl=' + encodeURIComponent(config.sellUrl + '/#/order/' + respones.data.orderId);
                     }else {
@@ -72,8 +74,14 @@
 
                 window.selectedGoods = '[]';
                 // 支付成功清空localstorage selectedGoods
-			}
-		}
+			},
+      handleInput() { //输入框值改变
+              this.phone = this.phone.replace(/[^\d]/g, '');
+      }
+		},
+    components:{
+      headTop
+    }
 	};
   function getCookie(name) {
     var arr;
@@ -90,12 +98,20 @@
 		position: absolute;
 		width: 100%;
 		height: 100%;
-		background-color: #f5f5f5;
+		background-color: #fff;
+
+    .navi {
+      margin-top: 0;
+      background-color: #fff;
+      height: 20px;
+      padding: 0 10px;
+    }
 
 		.user-info {
-			margin-top: 10px;
+			margin-top: 45px;
 			background-color: #fff;
 			margin-bottom: 20px;
+      border-top: 1px solid #eee;
 			.item {
 				padding: 0 14px;
 				display: flex;

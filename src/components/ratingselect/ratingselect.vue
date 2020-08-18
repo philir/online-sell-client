@@ -1,12 +1,18 @@
 <template>
   <div class="ratingselect">
     <div class="rating-type border-1px">
-      <span @click="select(2,$event)" class="block positive" :class="{'active':selectType===2}">{{desc.all}}<span
+      <span @click="select(0,$event)" class="block positive" :class="{'active':selectType===0}">{{desc.all}}<span
           class="count">{{ratings.length}}</span></span>
-      <span @click="select(0,$event)" class="block positive" :class="{'active':selectType===0}">{{desc.positive}}<span
+      <span @click="select(5,$event)" class="block positive" :class="{'active':selectType===5}">{{desc.good}}<span
+          class="count">{{goods.length}}</span></span>
+      <span @click="select(4,$event)" class="block negative" :class="{'active':selectType===4}">{{desc.positive}}<span
           class="count">{{positives.length}}</span></span>
-      <span @click="select(1,$event)" class="block negative" :class="{'active':selectType===1}">{{desc.negative}}<span
+      <span @click="select(3,$event)" class="block negative" :class="{'active':selectType===3}">{{desc.average}}<span
+          class="count">{{averages.length}}</span></span>
+      <span @click="select(2,$event)" class="block negative" :class="{'active':selectType===2}">{{desc.negative}}<span
           class="count">{{negatives.length}}</span></span>
+      <span @click="select(1,$event)" class="block negative" :class="{'active':selectType===1}">{{desc.bad}}<span
+          class="count">{{bads.length}}</span></span>
     </div>
     <div @click="toggleContent" class="switch" :class="{'on':onlyContent}">
       <span class="icon-check_circle"></span>
@@ -16,16 +22,19 @@
 </template>
 
 <script type="text/ecmascript-6">
-  const POSITIVE = 0;
-  const NEGATIVE = 1;
-  const ALL = 2;
+  const ALL = 0;
+  const GOOD = 5;
+  const POSITIVE= 4;
+  const AVERAGE=3;
+  const NEGATIVE=2;
+  const BAD=1;
 
   export default {
     props: {
       ratings: {
-        type: Array,
+        type: Object,
         default() {
-          return [];
+          return {};
         }
       },
       selectType: {
@@ -40,24 +49,42 @@
         type: Object,
         default() {
           return {
-            all: '全部',
+            good: '非常满意',
             positive: '满意',
-            negative: '不满意'
+            average: '一般',
+            negative: '差',
+            bad: '很差',
+            all: '全部'
           };
         }
       }
     },
     computed: {
+      goods() {
+        return this.ratings.filter((rating) => {
+          return rating.scoreStartNum === GOOD;
+        });
+      },
       positives() {
         return this.ratings.filter((rating) => {
-          return rating.rateType === POSITIVE;
+          return rating.scoreStartNum === POSITIVE;
+        });
+      },
+      averages() {
+        return this.ratings.filter((rating) => {
+          return rating.scoreStartNum === AVERAGE;
         });
       },
       negatives() {
         return this.ratings.filter((rating) => {
-          return rating.rateType === NEGATIVE;
+          return rating.scoreStartNum === NEGATIVE;
         });
-      }
+      },
+      bads() {
+        return this.ratings.filter((rating) => {
+          return rating.scoreStartNum === BAD;
+        });
+      },
     },
     methods: {
       select(type, event) {

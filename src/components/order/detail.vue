@@ -1,8 +1,12 @@
 <template>
+
     <div id="detail">
+            <div>
+              <head-top go-back='true' head-title="订单详情"></head-top>
+            </div>
             <div  class="statushead" >
                 <div  class="statuscircle" style="transform: scale(1); opacity: 1;">
-                    <img  class="circleimage" src="//fuss10.elemecdn.com/2/e4/bff50bab2840cdfbffeaf13a20710png.png" />
+                    <img  class="circleimage" src="/sell/image/fendou.jpg" />
                     <!---->
                 </div>
                 <!---->
@@ -17,7 +21,7 @@
             <div  class="restaurant-card" >
                 <div  class="head listitem">
                     <div  class="name-wrap">
-                        <img  class="avatar" src="//fuss10.elemecdn.com/2/e4/bff50bab2840cdfbffeaf13a20710png.png" />
+                        <img  class="avatar" src="/sell/image/fendou.jpg" />
                         <span  class="name">商品信息</span>
                     </div>
                     <!--<img  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAcCAMAAABf788oAAAAbFBMVEUAAAAzMzMzMzM2NjYzMzM1NTU0NDRAQEAzMzM0NDRAQEAzMzM0NDQzMzM0NDQ0NDQ0NDQzMzMzMzMzMzM0NDQ1NTU2NjY5OTk0NDQ0NDQzMzM0NDQzMzM0NDQ1NTU0NDQzMzM0NDQ3NzczMzMku2ijAAAAI3RSTlMA+/Yi4Do2CnhIBO/o176uopeGb2VALhsT8c/LtI2DXVVTM3zB6zwAAACGSURBVBjTfdBJEsIwDETRJHZMRkgIGZiHf/874mVbRaFdv42kzn6MCybnjAkE4JjIAFQKzQE4qez2wCuRK+S1ytZDUaqsHtpFxXXQOZWlBb+qlEWUTaXO4ZIs78Gb83R1c4PzRx8ypw0xz5JH88w95rfkB/CUXJmCJmDSP22lwZaezSH7N19vZgteSBxyaAAAAABJRU5ErkJggg==" class="icon-arrowright" />-->
@@ -47,13 +51,26 @@
                         配送信息
                     </div>
                     <ul  class="cardlist">
-                        <li  class="listitem"><span >送达时间：</span> 尽快送达 </li>
-                        <li  class="listitem"><span >送货地址：</span>
-                            <div  class="content">
-                                <p >{{order.buyerName}}</p>
-                                <p >{{order.buyerPhone}}</p>
-                                <p >{{order.buyerAddress}}</p>
-                            </div></li>
+                        <li  class="listitem"><span >送达时间：</span>
+                        <h1 v-if="order.orderStatus == 1">
+                          已送达
+                        </h1>
+                        <h1 v-else-if="order.orderStatus == 0">
+                          尽快送达
+                        </h1>
+                        <h1 v-else>
+                          未送达
+                        </h1>
+                         </li>
+                        <li  class="listitem"><span >买家姓名：</span>{{order.buyerName}}</li>
+                        <li  class="listitem"><span >手机号：</span>{{order.buyerPhone}}</li>
+                        <li  class="listitem"><span >送货地址：</span>{{order.buyerAddress}}</li>
+                            <!-- <div  class="content">
+                                <p ><span >买家姓名：</span>{{order.buyerName}}</p>
+                                <p ><span >手机号：</span>{{order.buyerPhone}}</p>
+                                <p ><span >送货地址：</span>{{order.buyerAddress}}</p>
+                            </div> -->
+
                         <!---->
                     </ul>
                 </div>
@@ -72,6 +89,7 @@
 </template>
 
 <script>
+  import headTop from 'src/components/header/head1'
     var config = require('config')
     config = process.env.NODE_ENV === 'development' ? config.dev : config.build
     export default {
@@ -83,7 +101,7 @@
            }
         },
         created() {
-            this.$http.get('/sell/buyer/order/detail', {
+            this.$http.get(this.HOST+'/buyer/order/detail', {
                 params: {
                     orderId: this.$route.params.orderId,
                     openid: getCookie('openid')
@@ -130,7 +148,7 @@
         methods: {
             cancelOrder: function (orderId) {
                 this.cancelOrderName = '取消中...'
-                this.$http.post('/sell/buyer/order/cancel', {
+                this.$http.post(this.HOST+'/buyer/order/cancel', {
                     orderId: orderId,
                     openid: getCookie('openid')
                 }).then(function (response) {
@@ -144,10 +162,13 @@
             },
             pay: function (orderId) {
                 location.href = config.wechatPayUrl +
-                    '?openid=' + getCookie('openid') +
+                    '?openid=oTgZpwY0gi26ntYJ1N-O5Q7QO9Ls' +
                     '&orderId=' + orderId +
                     '&returnUrl=' + encodeURIComponent(config.sellUrl + '/#/order/' + orderId);
             }
+        },
+        components:{
+          headTop
         }
     }
     function getCookie(name) {
@@ -171,18 +192,16 @@
     background-color: #f5f5f5;
     .statuscircle {
       margin-bottom: 10px;
-      text-align: center; 
+      text-align: center;
       img {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-      }     
-
+      }
     }
-    
     .statushead {
       position: relative;
-      padding-top: 20px;
+      padding-top: 45px;
       text-align: center;
       background-color: #fff;
       padding-bottom: 30px;
@@ -235,5 +254,5 @@
       background-color: #fff;
     }
   }
-  
+
 </style>

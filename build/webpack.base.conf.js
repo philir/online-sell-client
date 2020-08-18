@@ -9,7 +9,9 @@ var env = process.env.NODE_ENV
 var cssSourceMapDev = (env === 'development' && config.dev.cssSourceMap)
 var cssSourceMapProd = (env === 'production' && config.build.productionSourceMap)
 var useCssSourceMap = cssSourceMapDev || cssSourceMapProd
-
+function resolve (dir) {
+return path.join(__dirname, '..', dir)
+}
 module.exports = {
   entry: {
     app: './src/main.js'
@@ -51,8 +53,7 @@ module.exports = {
     //   //   exclude: /node_modules/
     //   // }
     // ],
-    loaders: [
-      {
+    loaders: [{
         test: /\.vue$/,
         loader: 'vue'
       },
@@ -83,14 +84,33 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
-      }
+      },
+      /* {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        loader: 'url-loader',
+        exclude: [resolve('src/icons')], // 注意把使用svg组件的文件去除掉
+        options: {
+          limit: 10000,
+          name: utils.assetsPath('img/[name].[hash:7].[ext]')
+        }
+      },
+      {
+        test: /\.svg$/,
+        loader: 'svg-sprite-loader',
+        include: [resolve('src/icons')], // 指定转换路径
+        options: {
+          symbolId: 'icon-[name]'
+        }
+      } */
     ]
   },
   eslint: {
     formatter: require('eslint-friendly-formatter')
   },
   vue: {
-    loaders: utils.cssLoaders({ sourceMap: useCssSourceMap }),
+    loaders: utils.cssLoaders({
+      sourceMap: useCssSourceMap
+    }),
     postcss: [
       require('autoprefixer')({
         browsers: ['last 2 versions', 'Android >= 4.0']

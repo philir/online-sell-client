@@ -3,11 +3,10 @@
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
-          <li v-for="(item,index) in goods" class="menu-item" :class="{'current':currentIndex===index}"
-              @click="selectMenu(index,$event)">
-          <span class="text border-1px">
-            <span v-show="item.type>0" class="icon" :class="classMap[item.type]"></span>{{item.name}}
-          </span>
+          <li v-for="(item,index) in goods" class="menu-item" :class="{'current':currentIndex===index}" @click="selectMenu(index,$event)">
+            <span class="text border-1px">
+              <span v-show="item.type>0" class="icon" :class="classMap[item.type]"></span>{{item.name}}
+            </span>
           </li>
         </ul>
       </div>
@@ -27,8 +26,7 @@
                     <span class="count">月售{{food.sellCount}}份</span><span>好评率{{food.rating}}%</span>
                   </div>
                   <div class="price">
-                    <span class="now">￥{{food.price}}</span><span class="old"
-                                                                  v-show="food.oldPrice">￥{{food.oldPrice}}</span>
+                    <span class="now">￥{{food.price}}</span><span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
                   </div>
                   <div class="cartcontrol-wrapper">
                     <cartcontrol @add="addFood" :food="food"></cartcontrol>
@@ -39,10 +37,10 @@
           </li>
         </ul>
       </div>
-      <shopcart ref="shopcart" :selectFoods="selectFoods"  :deliveryPrice="seller.deliveryPrice"
-                :minPrice="seller.minPrice" :seller="seller"></shopcart>
+      <shopcart ref="shopcart" :selectFoods="selectFoods" :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice"
+        :seller="seller"></shopcart>
     </div>
-    <food @add="addFood" :food="selectedFood"  ref="food"></food>
+    <food @add="addFood" :food="selectedFood" ref="food"></food>
   </div>
 </template>
 
@@ -94,41 +92,59 @@
       }
     },
     created() {
-        //如果url里有openid, 设置进cookie
-        var openid = this.$route.query.openid;
-        if(typeof openid !== 'undefined') {
-            document.cookie = 'openid=' + openid;
-        }
-        //获取openid
-        if(getCookie('openid') == null) {
-             location.href = config.openidUrl + '?returnUrl=' +  encodeURIComponent(config.sellUrl + '/#/');
-        }
+      //如果url里有openid, 设置进cookie
+      var openid = this.$route.query.openid;
+      if (typeof openid !== 'undefined') {
+        var exp = new Date();
+        exp.setTime(exp.getTime() + 3600 * 1000); //过期时间60分钟
+        document.cookie = 'openid=' + openid + ";expires=" + exp.toGMTString();
+      }
+      //获取openid
+      if (getCookie('openid') == null) {
+        location.href = config.openidUrl + '?returnUrl=' + encodeURIComponent(config.sellUrl + '/#/');
+      }
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
       let selectedGoods = window.selectedGoods;
       selectedGoods = selectedGoods ? JSON.parse(selectedGoods) : [];
-      this.$http.get('/sell/buyer/product/list').then((response) => {
+      this.$http.get(this.HOST + '/buyer/product/list').then((response) => {
         response = response.body;
-        if (response.code === ERR_OK) {
-          selectedGoods.map(item => {
-            response.data.map((food, index) => {
-//              console.log(food);
-              food.foods.map((foods, i) => {
-                // console.log(foods, item);
-                if (foods.id === item.id) {
-                  food.foods.splice(i, 1, Object.assign(food.foods[i], {count: item.count}));
-                  // food.foods[i].count = item.count;
-                  response.data.splice(index, 1, food);
-                }
-              });
+        if (typeof(response.code) == "undefined") {
+          alert('缺少code字段');
+          return;
+        }
+        if (response.code !== ERR_OK) {
+          alert('code != ' + ERR_OK);
+          return;
+        }
+        if (typeof(response.data) == "undefined") {
+          alert('缺少data字段');
+          return;
+        }
+        if (typeof(response.data[0].foods) == "undefined") {
+          alert('缺少foods字段, 请查看源码doc中api文档');
+          return;
+        }
+        selectedGoods.map(item => {
+          response.data.map((food, index) => {
+            //              console.log(food);
+            food.foods.map((foods, i) => {
+              // console.log(foods, item);
+              if (foods.id === item.id) {
+                food.foods.splice(i, 1, Object.assign(food.foods[i], {
+                  count: item.count
+                }));
+                // food.foods[i].count = item.count;
+                response.data.splice(index, 1, food);
+              }
             });
           });
-          this.goods = response.data;
-//          console.log('hello world', this.goods);
-          this.$nextTick(() => {
-            this._initScroll();
-            this._calculateHeight();
-          });
-        }
+        });
+        this.goods = response.data;
+        //          console.log('hello world', this.goods);
+        this.$nextTick(() => {
+          this._initScroll();
+          this._calculateHeight();
+        });
       });
     },
     methods: {
@@ -189,12 +205,12 @@
   };
 
   function getCookie(name) {
-      var arr;
-      var reg = new RegExp('(^| )' +name+"=([^;]*)(;|$)");
-      if(arr=document.cookie.match(reg))
-          return unescape(arr[2]);
-      else
-          return null;
+    var arr;
+    var reg = new RegExp('(^| )' + name + "=([^;]*)(;|$)");
+    if (arr = document.cookie.match(reg))
+      return unescape(arr[2]);
+    else
+      return null;
   }
 </script>
 
@@ -211,6 +227,7 @@
     .menu-wrapper
       flex: 0 0 80px
       width: 80px
+      height 399px
       background: #f3f5f7
       .menu-item
         display: table
@@ -252,6 +269,7 @@
           font-size: 12px
     .foods-wrapper
       flex: 1
+      height 399px
       .title
         padding-left: 14px
         height: 26px

@@ -13,16 +13,19 @@
           <router-link to="/seller">商家</router-link>
         </div>
       </div>
+      <footGuide></footGuide>
     </template>
 
     <router-view :seller="seller" :showHeader="showHeader"></router-view>
-
   </div>
+
 </template>
 
 <script type="text/ecmascript-6">
+
   import {urlParse} from 'common/js/util';
-  import header from 'components/header/header.vue';
+  import header from 'components/header/header';
+  import footGuide from 'components/footer/footGuide';
   const ERR_OK = 0;
 
   export default {
@@ -34,14 +37,18 @@
             return queryParam.id;
           })()
         },
-        showHeader: true
+        showHeader: true,
       };
     },
     methods: {
       changeHash() {
         const hash = window.location.hash;
+        
         if (hash.indexOf('payment') > -1
-        || hash.indexOf('order') > -1) {
+        || hash.indexOf('order') > -1
+        || hash.indexOf('profile') > -1
+        || hash.indexOf('comment') > -1
+        || hash.indexOf('balance') > -1) {
           this.showHeader = false;
         } else {
           this.showHeader = true;
@@ -54,7 +61,7 @@
         this.changeHash();
       });
       if (this.showHeader) {
-        this.$http.get('/sell/api/seller.json').then((response) => {
+        this.$http.get(this.HOST+'/api/seller.json').then((response) => {
           response = response.body;
           if (response.errno === ERR_OK) {
             this.seller = Object.assign({}, this.seller, response.data);
@@ -63,7 +70,8 @@
       }
     },
     components: {
-      'v-header': header
+      'v-header': header,
+      footGuide
     }
   };
 </script>

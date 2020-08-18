@@ -3,24 +3,24 @@
     <div class="ratings-content">
       <div class="overview">
         <div class="overview-left">
-          <h1 class="score">{{seller.score}}</h1>
+          <h1 class="score">{{overAllScore}}</h1>
           <div class="title">综合评分</div>
-          <div class="rank">高于周边商家{{seller.rankRate}}%</div>
+          <div class="rank">高于周边商家90%</div>
         </div>
         <div class="overview-right">
           <div class="score-wrapper">
             <span class="title">服务态度</span>
-            <star :size="36" :score="seller.serviceScore"></star>
-            <span class="score">{{seller.serviceScore}}</span>
+            <star :size="36" :score="serverScore"></star>
+            <span class="score">{{serverScore}}</span>
           </div>
           <div class="score-wrapper">
             <span class="title">商品评分</span>
-            <star :size="36" :score="seller.foodScore"></star>
-            <span class="score">{{seller.foodScore}}</span>
+            <star :size="36" :score="productionScore"></star>
+            <span class="score">{{productionScore}}</span>
           </div>
           <div class="delivery-wrapper">
             <span class="title">送达时间</span>
-            <span class="delivery">{{seller.deliveryTime}}分钟</span>
+            <span class="delivery">38分钟</span>
           </div>
         </div>
       </div>
@@ -29,24 +29,27 @@
                     :ratings="ratings"></ratingselect>
       <div class="rating-wrapper">
         <ul>
-          <li v-for="rating in ratings" v-show="needShow(rating.rateType, rating.text)" class="rating-item">
+          <li v-for="rating in ratings" v-show="needShow(rating.scoreStartNum, rating.context)" class="rating-item">
             <div class="avatar">
-              <img width="28" height="28" :src="rating.avatar">
+              <img width="28" height="28" :src="rating.buyerHeadimgurl">
             </div>
             <div class="content">
-              <h1 class="name">{{rating.username}}</h1>
+              <h1 class="name">{{rating.buyerNickname}}</h1>
               <div class="star-wrapper">
-                <star :size="24" :score="rating.score"></star>
-                <span class="delivery" v-show="rating.deliveryTime">{{rating.deliveryTime}}</span>
+                <star :size="24" :score="rating.scoreStartNum"></star>
+                <!-- <span class="delivery" v-show="rating.deliveryTime">{{rating.deliveryTime}}</span> -->
               </div>
-              <p class="text">{{rating.text}}</p>
-              <div class="recommend" v-show="rating.recommend && rating.recommend.length">
+              <p class="text">{{rating.context}}</p>
+              <!-- <div class="recommend" v-show="rating.recommend && rating.recommend.length">
                 <span class="icon-thumb_up"></span>
                 <span class="item" v-for="item in rating.recommend">{{item}}</span>
-              </div>
+              </div> -->
               <div class="time">
-                {{rating.rateTime | formatDate}}
+                {{rating.createTime | formatDate}}
               </div>
+            </div>
+            <div class="showImage">
+                <img class="wc-preview-img" :src="url" v-for="(url, key) in rating.imgUrls" :key="key" @click="$preview($event, rating.imgUrls, key)">
             </div>
           </li>
         </ul>
@@ -74,21 +77,52 @@
     data() {
       return {
         ratings: [],
+        overAllScore: 0,
+        serverScore: 0,
+        productionScore: 0,
         selectType: ALL,
-        onlyContent: true
+        onlyContent: true,
+        buyer: {},
+        buyerNickname: '',
+        buyerHeadimgurl: '',
+        buyerVip: 0.
       };
     },
     created() {
-      this.$http.get('/sell/api/ratings.json').then((response) => {
+      this.$http.get(this.HOST+'/comment/findAll').then((response) => {
         response = response.body;
-        if (response.errno === ERR_OK) {
+        if (response.code === ERR_OK) {
           this.ratings = response.data;
+          let result1 = 0
+          let result2 = 0
+          for(let index in this.ratings){
+            result1 += this.ratings[index].scoreStartNum
+            result2 += this.ratings[index].severStartNum
+          }
+          this.productionScore = Math.ceil((result1)/this.ratings.length)-0.1
+          this.serverScore = Math.ceil((result1)/this.ratings.length)-0.1
+          this.overAllScore = (this.productionScore+this.serverScore)/2
           this.$nextTick(() => {
             this.scroll = new BScroll(this.$refs.ratings, {
               click: true
             });
           });
         }
+      });
+
+      this.$http.get(this.HOST+'/buyer/buyerInfo', {
+          params: {
+              openid: getCookie('openid')
+          }
+      }).then(function (response) {
+          response = response.body
+          if(response.code == ERR_OK){
+            this.buyer = response.data;
+            this.buyerNickname = this.buyer.buyerNickname;
+            this.buyerHeadimgurl = this.buyer.buyerHeadimgurl;
+            this.buyerVip = this.buyer.buyerVip;
+          }
+
       });
     },
     methods: {
@@ -117,7 +151,7 @@
     },
     filters: {
       formatDate(time) {
-        let date = new Date(time);
+        let date = new Date(time * 1000);
         return formatDate(date, 'yyyy-MM-dd hh:mm');
       }
     },
@@ -127,6 +161,14 @@
       ratingselect
     }
   };
+  function getCookie(name) {
+    var arr;
+    var reg = new RegExp('(^| )' +name+"=([^;]*)(;|$)");
+    if(arr=document.cookie.match(reg))
+      return unescape(arr[2]);
+    else
+      return null;
+  }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
@@ -135,7 +177,7 @@
   .ratings
     position: absolute
     top: 174px
-    bottom: 0
+    bottom: 48px
     left: 0
     width: 100%
     overflow: hidden
@@ -209,10 +251,12 @@
           flex: 0 0 28px
           width: 28px
           margin-right: 12px
+          margin-top -13px
           img
             border-radius: 50%
         .content
-          position: relative
+          position: center
+          margin-top -13px
           flex: 1
           .name
             margin-bottom: 4px
@@ -234,6 +278,7 @@
               color: rgb(147, 153, 159)
           .text
             margin-bottom: 8px
+            margin-top: 10px
             line-height: 18px
             color: rgb(7, 17, 27)
             font-size: 12px
@@ -254,9 +299,16 @@
               background: #fff
           .time
             position: absolute
-            top: 0
+            top: 5px
             right: 0
             line-height: 12px
             font-size: 10px
             color: rgb(147, 153, 159)
+        .showImage
+          padding-left: 40px;
+          margin-top 10px
+          position: center
+          img
+            width: 54px;
+            height: 54px;
 </style>

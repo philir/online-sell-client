@@ -158,7 +158,7 @@
   .seller
     position: absolute
     top: 174px
-    bottom: 0
+    bottom: 48px
     left: 0
     width: 100%
     overflow: hidden

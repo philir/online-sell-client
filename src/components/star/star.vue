@@ -53,8 +53,8 @@
       background-repeat: no-repeat
     &.star-48
       .star-item
-        width: 20px
-        height: 20px
+        width: 10px
+        height: 10px
         margin-right: 22px
         background-size: 20px 20px
         &:last-child

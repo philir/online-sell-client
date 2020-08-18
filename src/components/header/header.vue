@@ -2,9 +2,9 @@
   <div class="header">
     <div class="content-wrapper">
       <div class="avatar">
-        <img width="64" height="64" :src="seller.avatar">
+        <img width="100" height="93" src="/sell/image/fendou.jpg">
       </div>
-      <div class="content">
+      <!-- <div class="content">
         <div class="title">
           <span class="brand"></span>
           <span class="name">{{seller.name}}</span>
@@ -16,16 +16,16 @@
           <span class="icon" :class="classMap[seller.supports[0].type]"></span>
           <span class="text">{{seller.supports[0].description}}</span>
         </div>
-      </div>
+      </div> -->
       <div v-if="seller.supports" class="support-count" @click="showDetail">
         <span class="count">{{seller.supports.length}}个</span>
         <i class="icon-keyboard_arrow_right"></i>
       </div>
     </div>
-    <div class="bulletin-wrapper" @click="showDetail">
+    <!-- <div class="bulletin-wrapper" @click="showDetail">
       <span class="bulletin-title"></span><span class="bulletin-text">{{seller.bulletin}}</span>
       <i class="icon-keyboard_arrow_right"></i>
-    </div>
+    </div> -->
     <div class="background">
       <img :src="seller.avatar" width="100%" height="100%">
     </div>
@@ -97,7 +97,7 @@
   };
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style lang="stylus" rel="stylesheet/stylus" scoped>
   @import "../../common/stylus/mixin";
 
   .header
@@ -110,6 +110,7 @@
       padding: 24px 12px 18px 24px
       font-size: 0
       .avatar
+        background-color:#007AFF
         display: inline-block
         vertical-align: top
         img
